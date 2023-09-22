@@ -1,6 +1,6 @@
 import './style.css';
 import CONSTANTS from './src/Constants.js';
-import { Node, Stage, Layer, Group, Shape } from './src/KonvaComponents/index.js';
+import { Node, Stage, Layer, Group, Shape, Rect } from './src/KonvaComponents/index.js';
 import { sceneFuncBound } from './src/Callbacks/index.js';
 
 const
@@ -23,27 +23,67 @@ const
     stroke: '#000000',
     width: StageDefaults.width() * 0.989,
     height: 64,
+    draggable: true,
+    sceneFunc: function(...args){
+      sceneFuncBound.call(this, ...args)
+    }
+  })
+  ,
+  rectBounds = new Rect({
+    strokeWidth: 4,
+    stroke: 'red',
   })
 
 globalThis.defaultStage = new Stage( StageDefaults.getAttrs() ).add(
 
-  globalThis.defaultLayer = new Layer({name: Object.keys({Default})[0] + Layer.name}).add(
+  globalThis.defaultLayer = new Layer( {name: Object.keys({Default} )[0] + Layer.name}).add(
 
-    globalThis.defaultGroup = new Group({name: Object.keys({Default})[0] + Group.name}).add(
+    rectBounds,
+    globalThis.defaultGroup = new Group( 
+      {
+        name: Object.keys({Default} )[0] + Group.name,
+        x:0,
+        y:0,
+      }
+    ).add(
 
-      globalThis.defaultBBox = new Shape({
-
+      new Shape({
         ...BoundingBoxDefaults.getAttrs()
         ,
-        sceneFunc: function(...args){
-          sceneFuncBound.call(this, ...args)
-        }
-
+        fill: 'lightgreen'
       })
-
+      ,
+      new Shape({
+        ...BoundingBoxDefaults.getAttrs()
+        ,
+        fill: 'orange'
+      })
+      ,
+      new Shape({
+        ...BoundingBoxDefaults.getAttrs()
+        ,
+        fill: 'grey'
+      })
     )
 
   )
 
 )
+
+if(defaultGroup.hasChildren){
+
+  let incrementalWidth = BoundingBoxDefaults.width();
+  let incrementalHeight = 0;
+  let defaultVerticalPadding = BoundingBoxDefaults.y();
+
+  rectBounds.setAttrs( defaultGroup.getClientRect() )
+  rectBounds.setAttr('height', (BoundingBoxDefaults.height()*defaultGroup.getChildren().length) )
+  defaultGroup.getChildren().forEach((each)=>{
+    each.setAttrs({
+      y: incrementalHeight+defaultVerticalPadding,
+    });
+    incrementalHeight += BoundingBoxDefaults.height();
+  })
+
+}
 
